@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시험·인증기관 찾기 - 중소기업 해외 인증 정보 플랫폼</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Malgun Gothic','맑은 고딕','Noto Sans KR',sans-serif; background:#f4f6f9; color:#333; }
+  .util-bar { background:#2c3e50; color:#cfd8e3; font-size:12px; }
+  .util-bar .inner { max-width:1400px; margin:0 auto; padding:6px 20px; display:flex; justify-content:space-between; }
+  .util-bar a { color:#cfd8e3; text-decoration:none; margin-left:14px; }
+  header { background:#fff; border-bottom:1px solid #e0e4ea; }
+  .hdr-inner { max-width:1400px; margin:0 auto; padding:16px 20px; display:flex; align-items:center; gap:14px; }
+  .site-title { font-size:20px; font-weight:bold; color:#1b3a5c; }
+  .site-sub { font-size:12px; color:#8a94a3; margin-top:2px; }
+  nav { background:#1b5faa; }
+  .gnb { max-width:1400px; margin:0 auto; display:flex; }
+  .gnb a { color:#fff; text-decoration:none; padding:14px 26px; font-size:15px; font-weight:600; opacity:.85; }
+  .gnb a:hover { background:rgba(255,255,255,.12); opacity:1; }
+  .gnb a.active { opacity:1; background:#0f4c8c; box-shadow:inset 0 -3px 0 #ffd200; }
+  .page-head { max-width:1400px; margin:0 auto; padding:18px 20px 0; }
+  .crumb { font-size:12px; color:#8a94a3; margin-bottom:8px; }
+  .page-title { font-size:24px; font-weight:bold; color:#1b3a5c; }
+  .page-title .desc { font-size:13px; font-weight:normal; color:#6b7684; margin-left:10px; }
+
+  .cond-bar { max-width:1400px; margin:14px auto 0; padding:0 20px; }
+  .cond-inner { background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:14px 18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .cond-inner label { font-size:13px; font-weight:600; color:#44505f; }
+  .cond-inner select, .cond-inner input[type=text] { padding:8px 12px; font-size:13px; border:1px solid #c9d2de; border-radius:6px; background:#fff; min-width:140px; }
+  .cnt-info { margin-left:auto; font-size:13px; color:#6b7684; }
+  .cnt-info b { color:#e8710a; }
+
+  .type-tabs { max-width:1400px; margin:14px auto 0; padding:0 20px; display:flex; gap:8px; }
+  .type-tabs button { border:1px solid #c9d2de; background:#fff; border-radius:20px; padding:9px 20px; font-size:13px; font-weight:600; color:#44505f; cursor:pointer; }
+  .type-tabs button.on { background:#1b5faa; color:#fff; border-color:#1b5faa; }
+
+  .main-wrap { max-width:1400px; margin:14px auto 40px; padding:0 20px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .org-card { background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:10px; }
+  .org-card:hover { border-color:#1b5faa; box-shadow:0 3px 10px rgba(27,95,170,.1); }
+  .org-top { display:flex; align-items:center; gap:10px; }
+  .org-ic { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .t-test .org-ic { background:#e8f3fd; } .t-cert .org-ic { background:#eaf6ef; } .t-cons .org-ic { background:#fef4e6; }
+  .org-nm { font-size:15px; font-weight:bold; color:#243447; }
+  .org-en { font-size:11px; color:#8a94a3; }
+  .tbadge { margin-left:auto; font-size:11px; font-weight:600; border-radius:10px; padding:3px 10px; white-space:nowrap; }
+  .t-test .tbadge { background:#e8f3fd; color:#1b5faa; }
+  .t-cert .tbadge { background:#eaf6ef; color:#155724; }
+  .t-cons .tbadge { background:#fef4e6; color:#b26105; }
+  .org-row { font-size:12px; color:#5c6a7c; line-height:1.6; }
+  .org-row b { color:#44505f; }
+  .tags { display:flex; flex-wrap:wrap; gap:5px; }
+  .tg { background:#f0f4f9; color:#44505f; font-size:11px; border-radius:10px; padding:3px 9px; }
+  .org-foot { display:flex; gap:6px; margin-top:auto; }
+  .org-foot button { flex:1; font-size:12px; padding:9px 0; border-radius:6px; cursor:pointer; font-weight:600; }
+  .b-detail { background:#1b5faa; color:#fff; border:none; }
+  .b-quote { background:#fff; color:#1b5faa; border:1px solid #1b5faa; }
+  .empty { grid-column:1/-1; background:#fff; border:1px dashed #c9d2de; border-radius:10px; padding:50px; text-align:center; color:#8a94a3; font-size:14px; }
+  .example-band { background:#fff8e1; border-top:1px solid #f0e0a0; text-align:center; font-size:12px; color:#8a6d1a; padding:8px; }
+  footer { background:#2c3e50; color:#9fb0c3; font-size:12px; text-align:center; padding:18px; }
+</style>
+</head>
+<body>
+
+<div class="example-band">※ 본 화면은 제안 단계의 화면 구성(UI) 예시이며, 기관 정보는 이해를 돕기 위한 샘플입니다.</div>
+
+<div class="util-bar"><div class="inner">
+  <span>중소기업 수출지원 통합 서비스</span>
+  <span><a href="#">로그인</a><a href="#">회원가입</a><a href="#">ENGLISH</a></span>
+</div></div>
+
+<header><div class="hdr-inner">
+  <div>
+    <div class="site-title">중소기업 해외 인증 정보 플랫폼</div>
+    <div class="site-sub">SME Global Certification &amp; Export Regulation Platform</div>
+  </div>
+</div></header>
+
+<nav><div class="gnb">
+  <a href="#">해외인증정보</a>
+  <a href="#">수출규제정보</a>
+  <a href="글로벌_수출규제_지도_화면예시.html">글로벌 수출규제 지도</a>
+  <a href="맞춤형_조건검색_화면예시.html">맞춤형 조건검색</a>
+  <a href="식품_심층보고서_화면예시.html">식품 심층보고서</a>
+  <a href="#" class="active">시험·인증기관 찾기</a>
+</div></nav>
+
+<div class="page-head">
+  <div class="crumb">홈 &gt; 시험·인증기관 찾기</div>
+  <div class="page-title">🏛 시험·인증·컨설팅기관 찾기
+    <span class="desc">수출 국가·품목·인증 분야에 맞는 기관을 검색하고 견적을 요청할 수 있습니다.</span>
+  </div>
+</div>
+
+<div class="type-tabs" id="typeTabs">
+  <button class="on" data-v="all">전체</button>
+  <button data-v="test">🔬 시험기관</button>
+  <button data-v="cert">📜 인증기관</button>
+  <button data-v="cons">💼 컨설팅기관</button>
+</div>
+
+<div class="cond-bar"><div class="cond-inner">
+  <label>대상 국가</label>
+  <select id="fC"><option value="all">전체</option><option>미국</option><option>EU</option><option>중국</option><option>일본</option><option>베트남</option></select>
+  <label>인증 분야</label>
+  <select id="fF"><option value="all">전체</option><option>전기·전자</option><option>어린이제품</option><option>식품</option><option>화장품</option><option>화학물질</option></select>
+  <label>기관명 검색</label>
+  <input type="text" id="fQ" placeholder="기관명 입력">
+  <span class="cnt-info">검색 결과 <b id="cnt">0</b>개 기관</span>
+</div></div>
+
+<div class="main-wrap" id="grid"></div>
+
+<footer>본 화면 예시는 「글로벌 수출규제 시각화 플랫폼 구축」 제안을 위한 UI 시안입니다. © U&P Co., Ltd.</footer>
+
+<script>
+const ORGS=[
+ {nm:'한국산업기술시험원',en:'KTL',type:'test',ic:'🔬',countries:['미국','EU','중국','일본'],fields:['전기·전자'],items:'전기전자·무선기기·배터리',svc:'FCC·CE·CCC·PSE 시험, 국제공인성적서(KOLAS/ILAC) 발급',loc:'서울·진주'},
+ {nm:'한국화학융합시험연구원',en:'KTR',type:'test',ic:'🧪',countries:['미국','EU','중국','베트남'],fields:['화학물질','어린이제품','화장품'],items:'화학·소재·완구·화장품',svc:'REACH·CPSIA 시험, UN38.3, 유해물질 분석',loc:'과천·화성'},
+ {nm:'한국건설생활환경시험연구원',en:'KCL',type:'test',ic:'🏗',countries:['미국','EU','일본'],fields:['어린이제품','전기·전자'],items:'생활용품·건자재·완구',svc:'EN71·ASTM F963 시험, 유해원소 용출 시험',loc:'서울·세종'},
+ {nm:'한국의류시험연구원',en:'KATRI',type:'test',ic:'🧵',countries:['미국','EU','중국'],fields:['어린이제품'],items:'섬유·유아용품·잡화',svc:'섬유 유해물질, 어린이제품 물리 시험',loc:'서울'},
+ {nm:'TÜV SÜD Korea',en:'TÜV SÜD',type:'cert',ic:'📜',countries:['EU','미국'],fields:['전기·전자','화학물질'],items:'전기전자·기계·의료기기',svc:'CE(NB) 인증, GS마크, 국제 인증 원스톱',loc:'서울·수원'},
+ {nm:'SGS Korea',en:'SGS',type:'cert',ic:'🌐',countries:['미국','EU','중국','베트남'],fields:['식품','전기·전자'],items:'식품·소비재·전기전자',svc:'글로벌 인증·검사, 공급망 심사, 식품 위생 검사',loc:'서울·군포'},
+ {nm:'Intertek Korea',en:'Intertek',type:'cert',ic:'✅',countries:['미국','EU','중국'],fields:['전기·전자','어린이제품'],items:'전기전자·완구·소비재',svc:'ETL·CE·CPSIA 인증 및 시험, 공장심사',loc:'서울'},
+ {nm:'한국식품산업협회',en:'KFIA',type:'cons',ic:'🍱',countries:['미국','중국','일본'],fields:['식품'],items:'가공식품 전반',svc:'FDA 시설등록 대행, 수출 식품 라벨 검토, GACC 등록 지원',loc:'서울'},
+ {nm:'글로벌인증지원센터',en:'GCC',type:'cons',ic:'💼',countries:['미국','EU','중국','베트남','일본'],fields:['전기·전자','어린이제품','화장품'],items:'중소기업 전 품목',svc:'해외인증 취득 컨설팅, 정부 지원사업(해외인증지원) 연계',loc:'전국 (중기부 연계)'},
+ {nm:'화장품글로벌지원단',en:'K-Cosmetic',type:'cons',ic:'💄',countries:['중국','미국','EU','베트남'],fields:['화장품'],items:'기초·색조 화장품',svc:'NMPA·MoCRA·CPNP 등록 대행, 성분 사전 검토',loc:'서울·오송'},
+ {nm:'베트남 QUATEST 3 (협력)',en:'QUATEST 3',type:'test',ic:'🔬',countries:['베트남'],fields:['전기·전자','식품'],items:'전기전자·식품·소비재',svc:'CR 인증 시험, QCVN 적합성 평가 (현지)',loc:'호치민 (현지)'},
+ {nm:'중국 CQC 한국사무소',en:'CQC Korea',type:'cert',ic:'📜',countries:['중국'],fields:['전기·전자','어린이제품'],items:'CCC 대상 전 품목',svc:'CCC 인증 접수·공장심사 조율',loc:'서울'},
+];
+const TYPE_NM={test:'시험기관',cert:'인증기관',cons:'컨설팅기관'};
+let typeF='all';
+
+document.querySelectorAll('#typeTabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#typeTabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); typeF=b.dataset.v; draw();
+});
+fC.onchange=draw; fF.onchange=draw; fQ.oninput=draw;
+
+function draw(){
+  const c=fC.value,f=fF.value,q=fQ.value.trim().toLowerCase();
+  const hit=ORGS.filter(o=>
+    (typeF==='all'||o.type===typeF)&&
+    (c==='all'||o.countries.includes(c))&&
+    (f==='all'||o.fields.includes(f))&&
+    (!q||o.nm.toLowerCase().includes(q)||o.en.toLowerCase().includes(q)));
+  cnt.textContent=hit.length;
+  grid.innerHTML=hit.map(o=>`
+    <div class="org-card t-${o.type}">
+      <div class="org-top">
+        <div class="org-ic">${o.ic}</div>
+        <div><div class="org-nm">${o.nm}</div><div class="org-en">${o.en}</div></div>
+        <span class="tbadge">${TYPE_NM[o.type]}</span>
+      </div>
+      <div class="org-row"><b>대상 국가</b> · ${o.countries.join(', ')}</div>
+      <div class="org-row"><b>대상 품목</b> · ${o.items}</div>
+      <div class="tags">${o.fields.map(t=>`<span class="tg">#${t}</span>`).join('')}</div>
+      <div class="org-row"><b>제공 서비스</b> · ${o.svc}</div>
+      <div class="org-row"><b>소재지</b> · ${o.loc}</div>
+      <div class="org-foot">
+        <button class="b-detail">기관 상세보기</button>
+        <button class="b-quote">견적·상담 요청</button>
+      </div>
+    </div>`).join('')||'<div class="empty">조건에 맞는 기관이 없습니다. 필터를 변경해 보세요.</div>';
+}
+draw();
+</script>
+</body>
+</html>
