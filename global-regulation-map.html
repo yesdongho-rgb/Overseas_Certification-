@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>글로벌 수출규제 지도 - 중소기업 해외 인증 정보 플랫폼</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.5.3/css/jsvectormap.min.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Malgun Gothic','맑은 고딕','Noto Sans KR',sans-serif; background:#f4f6f9; color:#333; }
+
+  /* ===== 상단 유틸 바 ===== */
+  .util-bar { background:#2c3e50; color:#cfd8e3; font-size:12px; }
+  .util-bar .inner { max-width:1400px; margin:0 auto; padding:6px 20px; display:flex; justify-content:space-between; }
+  .util-bar a { color:#cfd8e3; text-decoration:none; margin-left:14px; }
+
+  /* ===== 헤더 ===== */
+  header { background:#fff; border-bottom:1px solid #e0e4ea; }
+  .hdr-inner { max-width:1400px; margin:0 auto; padding:16px 20px; display:flex; align-items:center; gap:14px; }
+  .site-title { font-size:20px; font-weight:bold; color:#1b3a5c; }
+  .site-sub { font-size:12px; color:#8a94a3; margin-top:2px; }
+  .hdr-search { margin-left:auto; display:flex; }
+  .hdr-search input { width:260px; border:2px solid #1b5faa; border-radius:20px 0 0 20px; padding:8px 16px; font-size:13px; outline:none; }
+  .hdr-search button { background:#1b5faa; color:#fff; border:none; border-radius:0 20px 20px 0; padding:0 18px; font-size:13px; cursor:pointer; }
+
+  /* ===== GNB ===== */
+  nav { background:#1b5faa; }
+  .gnb { max-width:1400px; margin:0 auto; display:flex; }
+  .gnb a { color:#fff; text-decoration:none; padding:14px 26px; font-size:15px; font-weight:600; opacity:.85; }
+  .gnb a:hover { background:rgba(255,255,255,.12); opacity:1; }
+  .gnb a.active { opacity:1; background:#0f4c8c; box-shadow:inset 0 -3px 0 #ffd200; }
+
+  /* ===== 브레드크럼 + 타이틀 ===== */
+  .page-head { max-width:1400px; margin:0 auto; padding:18px 20px 0; }
+  .crumb { font-size:12px; color:#8a94a3; margin-bottom:8px; }
+  .page-title { font-size:24px; font-weight:bold; color:#1b3a5c; display:flex; align-items:center; gap:10px; }
+  .page-title .desc { font-size:13px; font-weight:normal; color:#6b7684; margin-left:6px; }
+
+  /* ===== 조건 바 ===== */
+  .cond-bar { max-width:1400px; margin:14px auto 0; padding:0 20px; }
+  .cond-inner { background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:14px 18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .cond-inner label { font-size:13px; font-weight:600; color:#44505f; }
+  .cond-inner select { padding:8px 12px; font-size:13px; border:1px solid #c9d2de; border-radius:6px; background:#fff; min-width:150px; }
+  .btn-cond { background:#1b5faa; color:#fff; border:none; border-radius:6px; padding:9px 22px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-cond.sub { background:#fff; color:#1b5faa; border:1px solid #1b5faa; }
+
+  /* ===== 메인 레이아웃 ===== */
+  .main-wrap { max-width:1400px; margin:16px auto 40px; padding:0 20px; display:grid; grid-template-columns:1fr 430px; gap:16px; }
+
+  .map-card { background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:16px; position:relative; }
+  .map-card h3 { font-size:15px; color:#1b3a5c; margin-bottom:8px; }
+  #worldMap { width:100%; height:540px; }
+  .legend { position:absolute; left:24px; bottom:20px; background:rgba(255,255,255,.95); border:1px solid #dfe4ec; border-radius:8px; padding:10px 14px; font-size:12px; z-index:5; }
+  .legend .row { display:flex; align-items:center; gap:8px; margin:3px 0; }
+  .legend .sw { width:16px; height:12px; border-radius:3px; }
+  .map-tip { font-size:12px; color:#8a94a3; margin-top:6px; }
+
+  /* ===== 국가 상세 패널 ===== */
+  .panel { background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden; display:flex; flex-direction:column; }
+  .panel-head { background:linear-gradient(135deg,#1b5faa,#2f7cc9); color:#fff; padding:16px 18px; }
+  .panel-head .flag { font-size:30px; vertical-align:middle; margin-right:8px; }
+  .panel-head .cname { font-size:20px; font-weight:bold; vertical-align:middle; }
+  .panel-head .ename { font-size:12px; opacity:.8; margin-left:6px; }
+  .kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+  .kpi { background:rgba(255,255,255,.14); border-radius:8px; padding:8px 10px; text-align:center; }
+  .kpi .v { font-size:18px; font-weight:bold; }
+  .kpi .k { font-size:11px; opacity:.85; margin-top:2px; }
+
+  .tabs { display:flex; border-bottom:1px solid #dfe4ec; }
+  .tabs button { flex:1; background:#f7f9fc; border:none; border-bottom:3px solid transparent; padding:12px 0; font-size:13px; font-weight:600; color:#6b7684; cursor:pointer; }
+  .tabs button.on { background:#fff; color:#1b5faa; border-bottom-color:#1b5faa; }
+
+  .tab-body { padding:16px 18px; flex:1; overflow-y:auto; max-height:430px; }
+  .reg-item { border-left:3px solid #1b5faa; background:#f7f9fc; border-radius:0 8px 8px 0; padding:10px 12px; margin-bottom:10px; }
+  .reg-item .t { font-size:13px; font-weight:bold; color:#243447; }
+  .reg-item .d { font-size:12px; color:#5c6a7c; margin-top:4px; line-height:1.5; }
+  .reg-item .src { font-size:11px; color:#1b5faa; margin-top:4px; }
+
+  table.cert { width:100%; border-collapse:collapse; font-size:12px; }
+  table.cert th { background:#f0f4f9; color:#44505f; padding:8px 6px; border-bottom:1px solid #dfe4ec; }
+  table.cert td { padding:9px 6px; border-bottom:1px solid #eef1f6; text-align:center; }
+  table.cert td.l { text-align:left; font-weight:600; color:#243447; }
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600; }
+  .badge.m { background:#fde8e8; color:#c0392b; }
+  .badge.v { background:#e8f3fd; color:#1b5faa; }
+
+  .cus-item { display:flex; gap:8px; font-size:13px; line-height:1.6; margin-bottom:10px; color:#44505f; }
+  .cus-item .ic { color:#1b5faa; font-weight:bold; }
+
+  .panel-foot { border-top:1px solid #dfe4ec; padding:12px 18px; display:flex; gap:8px; }
+  .panel-foot button { flex:1; padding:11px 0; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; }
+  .b-report { background:#e8710a; color:#fff; border:none; }
+  .b-search { background:#fff; color:#1b5faa; border:1px solid #1b5faa; }
+
+  .example-band { background:#fff8e1; border-top:1px solid #f0e0a0; text-align:center; font-size:12px; color:#8a6d1a; padding:8px; }
+  footer { background:#2c3e50; color:#9fb0c3; font-size:12px; text-align:center; padding:18px; }
+
+  .jvm-tooltip { background:#1b3a5c; font-family:inherit; }
+</style>
+</head>
+<body>
+
+<div class="example-band">※ 본 화면은 제안 단계의 화면 구성(UI) 예시이며, 표시된 데이터는 이해를 돕기 위한 샘플입니다.</div>
+
+<div class="util-bar"><div class="inner">
+  <span>중소기업 수출지원 통합 서비스</span>
+  <span><a href="#">로그인</a><a href="#">회원가입</a><a href="#">ENGLISH</a></span>
+</div></div>
+
+<header><div class="hdr-inner">
+  <div>
+    <div class="site-title">중소기업 해외 인증 정보 플랫폼</div>
+    <div class="site-sub">SME Global Certification &amp; Export Regulation Platform</div>
+  </div>
+  <div class="hdr-search">
+    <input type="text" placeholder="국가, 품목, 인증명을 검색하세요">
+    <button>검색</button>
+  </div>
+</div></header>
+
+<nav><div class="gnb">
+  <a href="#">해외인증정보</a>
+  <a href="#">수출규제정보</a>
+  <a href="#" class="active">글로벌 수출규제 지도</a>
+  <a href="custom-search.html">맞춤형 조건검색</a>
+  <a href="food-report.html">식품 심층보고서</a>
+  <a href="cert-organizations.html">시험·인증기관 찾기</a>
+</div></nav>
+
+<div class="page-head">
+  <div class="crumb">홈 &gt; 글로벌 수출규제 지도</div>
+  <div class="page-title">🌐 글로벌 수출규제 지도
+    <span class="desc">지도에서 국가를 선택하면 해당 국가의 수출규제·인증·통관/라벨링 정보를 확인할 수 있습니다.</span>
+  </div>
+</div>
+
+<div class="cond-bar"><div class="cond-inner">
+  <label>품목군</label>
+  <select id="selCat">
+    <option value="all">전체</option>
+    <option>전기·전자</option>
+    <option>어린이제품</option>
+    <option>식품</option>
+    <option>화장품</option>
+    <option>기계·부품</option>
+  </select>
+  <label>정보 유형</label>
+  <select>
+    <option>전체</option><option>해외인증</option><option>수출규제</option><option>통관·라벨링</option>
+  </select>
+  <button class="btn-cond">적용</button>
+  <button class="btn-cond sub">조건 초기화</button>
+</div></div>
+
+<div class="main-wrap">
+  <!-- 지도 영역 -->
+  <div class="map-card">
+    <h3>국가별 규제정보 현황</h3>
+    <div id="worldMap"></div>
+    <div class="legend">
+      <div class="row"><span class="sw" style="background:#c0392b"></span> 규제 강도 높음</div>
+      <div class="row"><span class="sw" style="background:#e8710a"></span> 규제 강도 중간</div>
+      <div class="row"><span class="sw" style="background:#2e86c1"></span> 규제 강도 보통</div>
+      <div class="row"><span class="sw" style="background:#d5dde6"></span> 정보 준비 중</div>
+    </div>
+    <div class="map-tip">💡 지도를 확대/축소하거나 국가를 클릭해 보세요. 색상이 표시된 국가는 규제정보가 구축된 국가입니다.</div>
+  </div>
+
+  <!-- 국가 상세 패널 -->
+  <div class="panel">
+    <div class="panel-head">
+      <div><span class="flag" id="pFlag">🇺🇸</span><span class="cname" id="pName">미국</span><span class="ename" id="pEng">United States</span></div>
+      <div class="kpis">
+        <div class="kpi"><div class="v" id="kCert">4</div><div class="k">필수 인증</div></div>
+        <div class="kpi"><div class="v" id="kReg">5</div><div class="k">적용 규제</div></div>
+        <div class="kpi"><div class="v" id="kUpd">'26.05</div><div class="k">최근 개정</div></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="on" data-tab="reg">주요 규제정보</button>
+      <button data-tab="cert">품목별 인증정보</button>
+      <button data-tab="cus">통관·라벨링</button>
+    </div>
+    <div class="tab-body" id="tabBody"></div>
+    <div class="panel-foot">
+      <button class="b-report" id="btnReport">📄 식품 심층보고서 보기</button>
+      <button class="b-search">🔍 맞춤형 조건검색으로 이동</button>
+    </div>
+  </div>
+</div>
+
+<footer>본 화면 예시는 「글로벌 수출규제 시각화 플랫폼 구축」 제안을 위한 UI 시안입니다. © U&P Co., Ltd.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.5.3/js/jsvectormap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsvectormap/1.5.3/maps/world.js"></script>
+<script>
+const DATA = {
+  US:{name:'미국',eng:'United States',flag:'🇺🇸',upd:"'26.05",report:true,
+    regs:[
+      {t:'소비자제품안전개선법 (CPSIA)',d:'어린이제품 납·프탈레이트 함유 기준, CPC 인증서 및 제3자 시험 의무.',s:'근거: CPSC / 16 CFR'},
+      {t:'식품안전현대화법 (FSMA)',d:'식품 수출 시 FDA 시설등록 및 사전신고(Prior Notice) 필수.',s:'근거: FDA / 21 CFR'},
+      {t:'TSCA 화학물질 규제',d:'수입 물품 내 규제 화학물질(PBT 등) 함유 시 신고·제한 대상.',s:'근거: EPA / TSCA'},
+      {t:'FCC 전파 규제',d:'무선·전자기기 전자파 적합성 인증(FCC ID) 취득 의무.',s:'근거: FCC / 47 CFR'}],
+    certs:[
+      {n:'FCC 인증',c:'전기·전자',t:'무선·전자기기',m:1},
+      {n:'FDA 시설등록',c:'식품',t:'식품·건강기능식품',m:1},
+      {n:'CPC (아동제품인증)',c:'어린이제품',t:'12세 이하 사용 제품',m:1},
+      {n:'UL 인증',c:'전기·전자',t:'전기제품 안전',m:0},
+      {n:'FDA MoCRA 등록',c:'화장품',t:'화장품 시설·제품',m:1}],
+    cus:['식품: FDA 사전신고(Prior Notice) 미이행 시 통관 보류','원산지 표시: "Made in Korea" 영문 표기 의무','영양성분표(Nutrition Facts) FDA 서식 적용','전자제품: FCC ID 라벨 부착 확인']},
+  CN:{name:'중국',eng:'China',flag:'🇨🇳',upd:"'26.04",report:true,
+    regs:[
+      {t:'CCC 강제인증 제도',d:'전기전자·완구 등 지정 품목은 CCC 인증 없이 통관 불가.',s:'근거: CNCA 공고'},
+      {t:'GB 표준 (국가표준)',d:'품목별 GB 강제표준 적합성 요구. 식품은 GB 2760 첨가물 기준 적용.',s:'근거: SAMR'},
+      {t:'화장품감독관리조례 (CSAR)',d:'화장품 NMPA 등록·허가 및 안전성 평가 자료 제출 의무.',s:'근거: NMPA'}],
+    certs:[
+      {n:'CCC 인증',c:'전기·전자',t:'전기전자·완구 등 지정품목',m:1},
+      {n:'NMPA 등록',c:'화장품',t:'일반·기능성 화장품',m:1},
+      {n:'GB 식품표준 검험',c:'식품',t:'가공식품 전반',m:1},
+      {n:'CQC 인증',c:'전기·전자',t:'비강제 품목 품질인증',m:0}],
+    cus:['식품: 수출기업 해관총서(GACC) 등록 필수','중문 라벨 사전 심사 및 부착 의무','화장품: 통관 시 위생허가증 대조','완구: CCC 마크 미부착 시 반송']},
+  DE:{name:'독일 (EU)',eng:'Germany / EU',flag:'🇪🇺',upd:"'26.06",report:true,
+    regs:[
+      {t:'CE 마킹 (신접근지침)',d:'전기·기계·완구 등 EU 지침 대상 품목은 CE 적합성 선언 의무.',s:'근거: EU 2019/1020'},
+      {t:'REACH 화학물질 규제',d:'고위험우려물질(SVHC) 함유 신고, 제한물질 초과 시 수출 불가.',s:'근거: ECHA / REACH'},
+      {t:'CBAM 탄소국경조정제도',d:'철강·알루미늄 등 대상 품목 탄소배출량 보고 의무.',s:'근거: EU 2023/956'},
+      {t:'식품 일반법 (GFL) 및 라벨링 규정',d:'EU 식품표시규정(FIC) 준수, 알레르기 표시 의무.',s:'근거: EU 1169/2011'}],
+    certs:[
+      {n:'CE 마킹',c:'전기·전자',t:'전기·기계·완구·의료기기',m:1},
+      {n:'REACH 등록',c:'기계·부품',t:'화학물질 함유 제품',m:1},
+      {n:'EN 71 시험',c:'어린이제품',t:'완구 안전',m:1},
+      {n:'CPNP 등록',c:'화장품',t:'EU 판매 화장품',m:1}],
+    cus:['EU 역내 책임자(AR) 지정 의무','CE 마크·수입자 정보 라벨 표기','식품: 알레르기 유발물질 굵은 글씨 표시','포장재 재활용 표시(Green Dot) 권고']},
+  VN:{name:'베트남',eng:'Vietnam',flag:'🇻🇳',upd:"'26.03",report:true,
+    regs:[
+      {t:'기술규정 적합인증 (CR마크)',d:'전기전자·완구 등 QCVN 대상 품목 적합성 인증 의무.',s:'근거: MOST'},
+      {t:'식품안전법',d:'가공식품 자가공시 또는 등록공시 후 유통 가능.',s:'근거: 의정서 15/2018/ND-CP'}],
+    certs:[
+      {n:'CR 인증 (QCVN)',c:'전기·전자',t:'전기전자·완구',m:1},
+      {n:'식품 공시 등록',c:'식품',t:'가공식품·건강식품',m:1},
+      {n:'화장품 신고 (CFS)',c:'화장품',t:'화장품 전반',m:1}],
+    cus:['베트남어 라벨 부착 의무 (수입자 정보 포함)','식품: 공시번호 라벨 기재','통관 시 원산지증명서(C/O) 제출 — 한-베 FTA 활용 가능']},
+  JP:{name:'일본',eng:'Japan',flag:'🇯🇵',upd:"'26.05",report:true,
+    regs:[
+      {t:'전기용품안전법 (PSE)',d:'지정 전기용품 PSE 마크 인증 의무. 리튬배터리 포함.',s:'근거: METI'},
+      {t:'식품위생법',d:'수입식품 후생노동성 신고 및 첨가물 포지티브리스트 적합.',s:'근거: MHLW'},
+      {t:'전파법 (TELEC)',d:'무선기기 기술기준적합증명 취득 의무.',s:'근거: MIC'}],
+    certs:[
+      {n:'PSE 인증',c:'전기·전자',t:'전기용품·배터리',m:1},
+      {n:'TELEC 인증',c:'전기·전자',t:'무선기기',m:1},
+      {n:'식품 수입신고',c:'식품',t:'전체 수입식품',m:1},
+      {n:'ST 마크',c:'어린이제품',t:'완구',m:0}],
+    cus:['식품: 검역소 수입신고 및 첨가물 기준 확인','일본어 라벨(원재료·보존방법) 의무','PSE 마크 및 수입사업자명 표기']},
+  IN:{name:'인도',eng:'India',flag:'🇮🇳',upd:"'26.02",report:false,
+    regs:[
+      {t:'BIS 강제인증 (CRS)',d:'전자제품 등 지정품목 BIS 등록 없이 수입 불가.',s:'근거: MeitY/BIS'},
+      {t:'FSSAI 식품 규제',d:'수입식품 FSSAI 라이선스 및 라벨 승인 필요.',s:'근거: FSSAI'}],
+    certs:[
+      {n:'BIS 등록 (CRS)',c:'전기·전자',t:'전자제품·배터리',m:1},
+      {n:'FSSAI 등록',c:'식품',t:'가공식품',m:1},
+      {n:'WPC 승인',c:'전기·전자',t:'무선기기',m:1}],
+    cus:['BIS 마크·표준번호 라벨 표기','식품: FSSAI 로고·수입자 정보 의무','MRP(최대소매가격) 라벨 부착 의무']},
+  ID:{name:'인도네시아',eng:'Indonesia',flag:'🇮🇩',upd:"'26.01",report:true,
+    regs:[
+      {t:'SNI 강제인증',d:'완구·전자 등 지정품목 SNI 인증 의무.',s:'근거: BSN'},
+      {t:'할랄보장법 (JPH)',d:'식품·화장품 등 단계적 할랄인증 의무화.',s:'근거: BPJPH'}],
+    certs:[
+      {n:'SNI 인증',c:'전기·전자',t:'전자·완구·타이어 등',m:1},
+      {n:'BPOM 등록',c:'식품',t:'가공식품·건강식품',m:1},
+      {n:'할랄 인증',c:'식품',t:'식품·화장품',m:1}],
+    cus:['BPOM 등록번호(ML) 라벨 기재','인니어 라벨 의무','할랄 로고 표시 (의무화 품목)']},
+  BR:{name:'브라질',eng:'Brazil',flag:'🇧🇷',upd:"'25.12",report:false,
+    regs:[
+      {t:'INMETRO 인증',d:'전기제품·완구 등 강제인증 대상.',s:'근거: INMETRO'},
+      {t:'ANVISA 위생 규제',d:'식품·화장품·의료기기 등록 의무.',s:'근거: ANVISA'}],
+    certs:[
+      {n:'INMETRO 인증',c:'전기·전자',t:'전기제품·완구',m:1},
+      {n:'ANVISA 등록',c:'식품',t:'식품·화장품',m:1},
+      {n:'ANATEL 인증',c:'전기·전자',t:'무선·통신기기',m:1}],
+    cus:['포르투갈어 라벨 의무','INMETRO 마크 부착','수입 라이선스(LI) 사전 취득 품목 확인']}
+};
+const LEVEL = {US:3,CN:3,DE:3,JP:2,VN:2,IN:2,ID:2,BR:1};
+const COLORS = {3:'#c0392b',2:'#e8710a',1:'#2e86c1'};
+
+let cur='US', curTab='reg', catFilter='all';
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function render(){
+  const d=DATA[cur];
+  pFlag.textContent=d.flag; pName.textContent=d.name; pEng.textContent=d.eng;
+  const certs = catFilter==='all'? d.certs : d.certs.filter(c=>c.c===catFilter);
+  kCert.textContent=d.certs.filter(c=>c.m).length;
+  kReg.textContent=d.regs.length;
+  kUpd.textContent=d.upd;
+  btnReport.style.display = d.report? '':'none';
+
+  let html='';
+  if(curTab==='reg'){
+    html=d.regs.map(r=>`<div class="reg-item"><div class="t">${esc(r.t)}</div><div class="d">${esc(r.d)}</div><div class="src">🔗 ${esc(r.s)} · 원문 바로가기</div></div>`).join('');
+  }else if(curTab==='cert'){
+    html=`<table class="cert"><tr><th>인증명</th><th>대상 품목</th><th>구분</th></tr>`+
+      (certs.length? certs.map(c=>`<tr><td class="l">${esc(c.n)}</td><td>${esc(c.t)}</td><td><span class="badge ${c.m?'m':'v'}">${c.m?'강제':'임의'}</span></td></tr>`).join('') :
+      `<tr><td colspan="3" style="padding:20px;color:#8a94a3">선택한 품목군에 해당하는 인증정보가 없습니다.</td></tr>`)+`</table>
+      <div style="font-size:11px;color:#8a94a3;margin-top:10px">※ 인증 클릭 시 시험항목·준비서류·수행기관 상세 페이지로 이동 (예정)</div>`;
+  }else{
+    html=d.cus.map(c=>`<div class="cus-item"><span class="ic">✔</span><span>${esc(c)}</span></div>`).join('');
+  }
+  tabBody.innerHTML=html;
+}
+
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');curTab=b.dataset.tab;render();};
+});
+selCat.onchange=e=>{catFilter=e.target.value;render();};
+
+const vals={}; Object.keys(LEVEL).forEach(k=>vals[k]=COLORS[LEVEL[k]]);
+new jsVectorMap({
+  selector:'#worldMap', map:'world', zoomButtons:true,
+  backgroundColor:'transparent',
+  regionStyle:{ initial:{fill:'#d5dde6',stroke:'#fff',strokeWidth:.4}, hover:{fill:'#7fb3e0',cursor:'pointer'} },
+  series:{ regions:[{attribute:'fill', values:vals}] },
+  onRegionClick:(e,code)=>{ if(DATA[code]){cur=code;render();} },
+  onRegionTooltipShow:(e,tooltip,code)=>{
+    const d=DATA[code];
+    tooltip.text(d? `${d.name} — 규제정보 보기` : `${tooltip.text()} (정보 준비 중)`, false);
+  }
+});
+render();
+</script>
+</body>
+</html>

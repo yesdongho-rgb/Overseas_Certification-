@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>맞춤형 조건검색 - 중소기업 해외 인증 정보 플랫폼</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Malgun Gothic','맑은 고딕','Noto Sans KR',sans-serif; background:#f4f6f9; color:#333; }
+  .util-bar { background:#2c3e50; color:#cfd8e3; font-size:12px; }
+  .util-bar .inner { max-width:1400px; margin:0 auto; padding:6px 20px; display:flex; justify-content:space-between; }
+  .util-bar a { color:#cfd8e3; text-decoration:none; margin-left:14px; }
+  header { background:#fff; border-bottom:1px solid #e0e4ea; }
+  .hdr-inner { max-width:1400px; margin:0 auto; padding:16px 20px; display:flex; align-items:center; gap:14px; }
+  .site-title { font-size:20px; font-weight:bold; color:#1b3a5c; }
+  .site-sub { font-size:12px; color:#8a94a3; margin-top:2px; }
+  nav { background:#1b5faa; }
+  .gnb { max-width:1400px; margin:0 auto; display:flex; }
+  .gnb a { color:#fff; text-decoration:none; padding:14px 26px; font-size:15px; font-weight:600; opacity:.85; }
+  .gnb a:hover { background:rgba(255,255,255,.12); opacity:1; }
+  .gnb a.active { opacity:1; background:#0f4c8c; box-shadow:inset 0 -3px 0 #ffd200; }
+  .page-head { max-width:1400px; margin:0 auto; padding:18px 20px 0; }
+  .crumb { font-size:12px; color:#8a94a3; margin-bottom:8px; }
+  .page-title { font-size:24px; font-weight:bold; color:#1b3a5c; }
+  .page-title .desc { font-size:13px; font-weight:normal; color:#6b7684; margin-left:10px; }
+
+  .main-wrap { max-width:1400px; margin:16px auto 40px; padding:0 20px; display:grid; grid-template-columns:380px 1fr; gap:16px; align-items:start; }
+
+  /* ===== 조건 패널 ===== */
+  .cond-panel { background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden; position:sticky; top:10px; }
+  .cond-panel h3 { background:#1b5faa; color:#fff; font-size:15px; padding:13px 18px; }
+  .cond-body { padding:16px 18px; }
+  .step { margin-bottom:18px; }
+  .step-tit { font-size:13px; font-weight:bold; color:#243447; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .step-tit .no { background:#1b5faa; color:#fff; font-size:11px; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; }
+  .step select { width:100%; padding:9px 12px; font-size:13px; border:1px solid #c9d2de; border-radius:6px; background:#fff; }
+  .chip-row { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { border:1px solid #c9d2de; background:#fff; border-radius:16px; padding:6px 13px; font-size:12px; cursor:pointer; color:#44505f; user-select:none; }
+  .chip.on { background:#1b5faa; color:#fff; border-color:#1b5faa; font-weight:600; }
+  .ing-box { border:1px solid #c9d2de; border-radius:6px; padding:6px; display:flex; flex-wrap:wrap; gap:5px; min-height:40px; }
+  .ing-box input { border:none; outline:none; font-size:12px; flex:1; min-width:90px; padding:4px; }
+  .tag { background:#e8f3fd; color:#1b5faa; font-size:12px; border-radius:12px; padding:3px 10px; font-weight:600; cursor:pointer; }
+  .tag::after { content:' ×'; color:#8a94a3; }
+  .ing-hint { font-size:11px; color:#8a94a3; margin-top:5px; }
+  .btn-search { width:100%; background:#e8710a; color:#fff; border:none; border-radius:8px; padding:13px 0; font-size:15px; font-weight:bold; cursor:pointer; margin-top:4px; }
+  .btn-reset { width:100%; background:#fff; color:#6b7684; border:1px solid #c9d2de; border-radius:8px; padding:9px 0; font-size:12px; cursor:pointer; margin-top:8px; }
+  .live-note { font-size:11px; color:#1b5faa; text-align:center; margin-top:8px; }
+
+  /* ===== 결과 영역 ===== */
+  .result-area {}
+  .sum-bar { background:linear-gradient(135deg,#1b5faa,#2f7cc9); color:#fff; border-radius:10px; padding:16px 20px; display:flex; align-items:center; gap:26px; margin-bottom:14px; flex-wrap:wrap; }
+  .sum-bar .cond-txt { font-size:13px; opacity:.9; flex:1; min-width:220px; line-height:1.6; }
+  .sum-bar .num { text-align:center; }
+  .sum-bar .num .v { font-size:26px; font-weight:bold; }
+  .sum-bar .num .k { font-size:11px; opacity:.85; }
+  .sum-actions { display:flex; gap:8px; }
+  .sum-actions button { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.5); color:#fff; border-radius:6px; padding:8px 14px; font-size:12px; cursor:pointer; }
+
+  .cat-tit { font-size:14px; font-weight:bold; color:#1b3a5c; margin:18px 2px 8px; }
+  .card { background:#fff; border:1px solid #dfe4ec; border-radius:10px; margin-bottom:10px; overflow:hidden; }
+  .card-hd { display:flex; align-items:center; gap:10px; padding:14px 18px; cursor:pointer; }
+  .card-hd:hover { background:#f7f9fc; }
+  .card-hd .nm { font-size:15px; font-weight:bold; color:#243447; flex:1; }
+  .card-hd .why { font-size:12px; color:#e8710a; }
+  .badge { display:inline-block; font-size:11px; padding:3px 10px; border-radius:10px; font-weight:600; white-space:nowrap; }
+  .badge.m { background:#fde8e8; color:#c0392b; }
+  .badge.v { background:#e8f3fd; color:#1b5faa; }
+  .badge.i { background:#fef4e6; color:#b26105; }
+  .arrow { color:#8a94a3; font-size:12px; transition:.2s; }
+  .card.open .arrow { transform:rotate(90deg); }
+  .card-bd { display:none; border-top:1px solid #eef1f6; padding:16px 18px; }
+  .card.open .card-bd { display:block; }
+  .detail-grid { display:grid; grid-template-columns:110px 1fr; gap:8px 12px; font-size:13px; }
+  .detail-grid .k { color:#6b7684; font-weight:600; }
+  .detail-grid .v { color:#333; line-height:1.55; }
+  .detail-grid .v a { color:#1b5faa; }
+  .empty { background:#fff; border:1px dashed #c9d2de; border-radius:10px; padding:50px 20px; text-align:center; color:#8a94a3; font-size:14px; }
+  .food-link { background:#fff8e1; border:1px solid #f0d98c; border-radius:10px; padding:14px 18px; font-size:13px; color:#7a5c00; margin-top:14px; display:flex; align-items:center; justify-content:space-between; }
+  .food-link button { background:#e8710a; color:#fff; border:none; border-radius:6px; padding:8px 16px; font-size:12px; font-weight:600; cursor:pointer; }
+  .example-band { background:#fff8e1; border-top:1px solid #f0e0a0; text-align:center; font-size:12px; color:#8a6d1a; padding:8px; }
+  footer { background:#2c3e50; color:#9fb0c3; font-size:12px; text-align:center; padding:18px; }
+</style>
+</head>
+<body>
+
+<div class="example-band">※ 본 화면은 제안 단계의 화면 구성(UI) 예시입니다. 조건을 변경하면 매칭 결과가 실시간으로 바뀝니다. (샘플 규칙 기반)</div>
+
+<div class="util-bar"><div class="inner">
+  <span>중소기업 수출지원 통합 서비스</span>
+  <span><a href="#">로그인</a><a href="#">회원가입</a><a href="#">ENGLISH</a></span>
+</div></div>
+
+<header><div class="hdr-inner">
+  <div>
+    <div class="site-title">중소기업 해외 인증 정보 플랫폼</div>
+    <div class="site-sub">SME Global Certification &amp; Export Regulation Platform</div>
+  </div>
+</div></header>
+
+<nav><div class="gnb">
+  <a href="#">해외인증정보</a>
+  <a href="#">수출규제정보</a>
+  <a href="global-regulation-map.html">글로벌 수출규제 지도</a>
+  <a href="#" class="active">맞춤형 조건검색</a>
+  <a href="food-report.html">식품 심층보고서</a>
+  <a href="cert-organizations.html">시험·인증기관 찾기</a>
+</div></nav>
+
+<div class="page-head">
+  <div class="crumb">홈 &gt; 맞춤형 조건검색</div>
+  <div class="page-title">🔍 수요 맞춤형 조건검색
+    <span class="desc">수출 조건을 선택하면 필요한 인증·시험·표시·등록 정보를 자동으로 매칭해 드립니다.</span>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <!-- 조건 패널 -->
+  <div class="cond-panel">
+    <h3>수출 조건 선택</h3>
+    <div class="cond-body">
+      <div class="step">
+        <div class="step-tit"><span class="no">1</span> 수출 국가</div>
+        <select id="fCountry">
+          <option value="US">미국</option>
+          <option value="EU">유럽연합 (EU)</option>
+          <option value="CN">중국</option>
+          <option value="JP">일본</option>
+          <option value="VN">베트남</option>
+        </select>
+      </div>
+      <div class="step">
+        <div class="step-tit"><span class="no">2</span> 제품군</div>
+        <select id="fProduct">
+          <option value="elec">전기·전자제품</option>
+          <option value="toy">완구·유아용품</option>
+          <option value="food">식품</option>
+          <option value="cosm">화장품</option>
+          <option value="living">생활용품</option>
+          <option value="mach">기계·부품</option>
+        </select>
+      </div>
+      <div class="step">
+        <div class="step-tit"><span class="no">3</span> 용도</div>
+        <div class="chip-row" id="fUse">
+          <span class="chip on" data-v="home">가정용</span>
+          <span class="chip" data-v="ind">산업용</span>
+          <span class="chip" data-v="biz">업무용</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-tit"><span class="no">4</span> 어린이용 여부 <span style="font-size:11px;color:#8a94a3;font-weight:normal">(12세 이하 사용)</span></div>
+        <div class="chip-row" id="fChild">
+          <span class="chip" data-v="Y">어린이용</span>
+          <span class="chip on" data-v="N">일반용</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-tit"><span class="no">5</span> 제품 기능 <span style="font-size:11px;color:#8a94a3;font-weight:normal">(복수 선택)</span></div>
+        <div class="chip-row" id="fFunc">
+          <span class="chip" data-v="power">⚡ 전원 사용</span>
+          <span class="chip" data-v="batt">🔋 배터리 내장</span>
+          <span class="chip" data-v="wifi">📶 무선(Wi-Fi/BT)</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-tit"><span class="no">6</span> 주요 성분·소재 <span style="font-size:11px;color:#8a94a3;font-weight:normal">(선택)</span></div>
+        <div class="ing-box" id="ingBox">
+          <input id="ingInput" list="ingList" placeholder="성분 입력 후 Enter">
+          <datalist id="ingList">
+            <option value="프탈레이트"><option value="납"><option value="니켈">
+            <option value="BPA"><option value="PVC"><option value="타르색소">
+          </datalist>
+        </div>
+        <div class="ing-hint">예: 프탈레이트, 납, BPA — 입력 시 성분 규제가 함께 매칭됩니다.</div>
+      </div>
+      <button class="btn-search" onclick="run()">조건 검색</button>
+      <button class="btn-reset" onclick="resetAll()">조건 초기화</button>
+      <div class="live-note">● 조건 변경 시 결과가 자동 갱신됩니다</div>
+    </div>
+  </div>
+
+  <!-- 결과 영역 -->
+  <div class="result-area">
+    <div class="sum-bar">
+      <div class="cond-txt" id="condTxt"></div>
+      <div class="num"><div class="v" id="nAll">0</div><div class="k">매칭 결과</div></div>
+      <div class="num"><div class="v" id="nMand">0</div><div class="k">강제 인증</div></div>
+      <div class="sum-actions">
+        <button>📄 결과 PDF 저장</button>
+        <button>⭐ 조건 저장</button>
+      </div>
+    </div>
+    <div id="results"></div>
+  </div>
+</div>
+
+<footer>본 화면 예시는 「글로벌 수출규제 시각화 플랫폼 구축」 제안을 위한 UI 시안입니다. © U&P Co., Ltd.</footer>
+
+<script>
+/* ===== 샘플 매칭 규칙 (실제 시스템에서는 DB 기반 규칙엔진으로 구현) ===== */
+const CN_NAMES={US:'미국',EU:'유럽연합(EU)',CN:'중국',JP:'일본',VN:'베트남'};
+const P_NAMES={elec:'전기·전자제품',toy:'완구·유아용품',food:'식품',cosm:'화장품',living:'생활용품',mach:'기계·부품'};
+
+const RULES=[
+/* ---------- 미국 ---------- */
+{c:'US',cat:'인증·등록',nm:'FCC ID 인증 (무선기기)',mand:1,why:'무선 기능 선택',
+ when:s=>s.wifi,
+ reg:'미 연방통신법 47 CFR Part 15 (의도적 방사체)',
+ test:'무선 출력·주파수·전자파(EMC) 시험',
+ doc:'시험성적서, 기술문서, FCC ID 등록 신청서',
+ lab:'제품 및 포장에 FCC ID 표기',
+ cus:'FCC ID 미등록 무선기기는 세관 압류 대상',
+ org:'FCC 인정시험소 (국내: KTL, KTR, KCTL 등)', link:'fcc.gov'},
+{c:'US',cat:'인증·등록',nm:'FCC SDoC (전기·전자제품)',mand:1,why:'전원 사용 선택',
+ when:s=>s.power&&!s.wifi,
+ reg:'47 CFR Part 15 (비의도적 방사체)',
+ test:'전자파 방출(EMI) 시험',
+ doc:'시험성적서, 적합성 선언서(SDoC)',
+ lab:'FCC 로고(선택) 및 책임자 정보 표기',
+ cus:'통관 시 적합성 선언 증빙 요구 가능',
+ org:'공인 EMC 시험소', link:'fcc.gov'},
+{c:'US',cat:'시험·검사',nm:'UN38.3 리튬배터리 시험',mand:1,why:'배터리 내장 선택',
+ when:s=>s.batt,
+ reg:'미 운수부(DOT) 위험물 운송규정 49 CFR',
+ test:'고도모의·진동·충격·과충전 등 8개 항목',
+ doc:'UN38.3 시험 요약서(Test Summary)',
+ lab:'리튬배터리 취급 라벨 (운송 포장)',
+ cus:'항공 운송 시 시험요약서 미제출 시 선적 거부',
+ org:'KTR, KTL, 한국화학융합시험연구원 등', link:'phmsa.dot.gov'},
+{c:'US',cat:'인증·등록',nm:'CPC 아동제품인증서',mand:1,why:'어린이용 선택',
+ when:s=>s.child,
+ reg:'소비자제품안전개선법(CPSIA)',
+ test:'납 함유량, 프탈레이트 6종, 소구경 부품 등 (완구는 ASTM F963 추가)',
+ doc:'CPSC 인정시험소 성적서, CPC 인증서, 추적 라벨',
+ lab:'제조자·생산일자 추적 라벨(Tracking Label) 의무',
+ cus:'CPC 미소지 시 통관 거부 및 리콜 대상',
+ org:'CPSC 인정시험소 (국내 KTR, KATRI 등)', link:'cpsc.gov'},
+{c:'US',cat:'인증·등록',nm:'FDA 시설등록 및 사전신고',mand:1,why:'식품 선택',
+ when:s=>s.p==='food',
+ reg:'식품안전현대화법(FSMA), 21 CFR',
+ test:'미생물·잔류농약·첨가물 기준 적합성',
+ doc:'FDA 시설등록번호, 미국 내 에이전트 지정, Prior Notice',
+ lab:'영양성분표(Nutrition Facts), 알레르기 표시 (영문)',
+ cus:'사전신고(Prior Notice) 없이 도착 시 통관 보류',
+ org:'FDA / 국내 대행: 한국식품산업협회 등', link:'fda.gov'},
+{c:'US',cat:'인증·등록',nm:'FDA MoCRA 화장품 등록',mand:1,why:'화장품 선택',
+ when:s=>s.p==='cosm',
+ reg:'화장품규제현대화법(MoCRA)',
+ test:'안전성 입증 자료 (안전성 평가)',
+ doc:'시설등록, 제품 리스팅, 미국 내 책임자(RP)',
+ lab:'성분표기(INCI), 책임자 연락처 표기',
+ cus:'등록번호 확인 요구 가능',
+ org:'FDA', link:'fda.gov'},
+{c:'US',cat:'성분 규제',nm:'CPSIA 프탈레이트 제한',mand:1,why:'성분: 프탈레이트',
+ when:s=>s.child&&s.ing.includes('프탈레이트'),
+ reg:'CPSIA §108 — 어린이제품 프탈레이트 8종 0.1% 초과 금지',
+ test:'프탈레이트 함유량 시험 (CPSC-CH-C1001)',
+ doc:'제3자 시험성적서 (CPC에 포함)',
+ lab:'—',
+ cus:'기준 초과 시 수입 금지·리콜',
+ org:'CPSC 인정시험소', link:'cpsc.gov'},
+{c:'US',cat:'성분 규제',nm:'납(Lead) 함유 기준',mand:1,why:'성분: 납',
+ when:s=>s.ing.includes('납'),
+ reg:'CPSIA — 어린이제품 총납 100ppm, 페인트·코팅 90ppm 제한',
+ test:'총납 함유량 시험',
+ doc:'시험성적서',
+ lab:'—',
+ cus:'기준 초과 시 수입 금지',
+ org:'CPSC 인정시험소', link:'cpsc.gov'},
+
+/* ---------- EU ---------- */
+{c:'EU',cat:'인증·등록',nm:'CE 마킹 — LVD/EMC 지침',mand:1,why:'전원 사용 선택',
+ when:s=>s.power&&!s.wifi,
+ reg:'저전압지침(LVD) 2014/35/EU, EMC지침 2014/30/EU',
+ test:'전기안전(EN 60335 등), 전자파 적합성 시험',
+ doc:'기술문서(TCF), EU 적합성선언서(DoC)',
+ lab:'CE 마크, 수입자 정보, EU 역내 책임자 표기',
+ cus:'CE 미표기 시 시장감시당국 회수 조치',
+ org:'국내 지정시험소 + EU 인정기관(NB, 필요 시)', link:'ec.europa.eu'},
+{c:'EU',cat:'인증·등록',nm:'CE 마킹 — RED 무선지침',mand:1,why:'무선 기능 선택',
+ when:s=>s.wifi,
+ reg:'무선기기지침(RED) 2014/53/EU',
+ test:'무선 성능·전자파·전기안전 통합 시험',
+ doc:'기술문서, DoC, (해당 시) NB 인증서',
+ lab:'CE 마크 + 주파수 사용 제한 국가 표기',
+ cus:'RED 부적합 기기 통관 차단 강화 추세',
+ org:'EU Notified Body / 국내 협약시험소', link:'ec.europa.eu'},
+{c:'EU',cat:'인증·등록',nm:'CE 마킹 — 완구안전지침 + EN 71',mand:1,why:'어린이용 선택',
+ when:s=>s.child,
+ reg:'완구안전지침(TSD) 2009/48/EC',
+ test:'EN 71 시리즈 (기계물리·가연성·유해원소 용출)',
+ doc:'기술문서, DoC, 시험성적서',
+ lab:'CE 마크, 연령 경고 표시(0-3세 등)',
+ cus:'RAPEX(위해제품 경보) 등재 시 전 회원국 유통 차단',
+ org:'국내 KTR·KATRI / EU NB', link:'ec.europa.eu'},
+{c:'EU',cat:'인증·등록',nm:'EU 배터리규정 (2023/1542)',mand:1,why:'배터리 내장 선택',
+ when:s=>s.batt,
+ reg:'EU 배터리·폐배터리 규정 — 탄소발자국·재활용 원료 신고 단계 적용',
+ test:'UN38.3 + 배터리 성능·내구성 시험',
+ doc:'CE 기술문서, 배터리 여권(단계적)',
+ lab:'분리배출 마크, 용량 표기',
+ cus:'미준수 시 통관 지연 가능',
+ org:'EU NB / 국내 협약시험소', link:'ec.europa.eu'},
+{c:'EU',cat:'성분 규제',nm:'REACH 제한물질 (부속서 XVII)',mand:1,why:'성분 입력',
+ when:s=>s.ing.length>0,
+ reg:'REACH 규정 1907/2006 — 프탈레이트·납·니켈 등 용도별 제한',
+ test:'해당 물질 함유량 시험 (예: 프탈레이트 0.1%, 니켈 용출)',
+ doc:'시험성적서, (SVHC 0.1% 초과 시) SCIP DB 신고',
+ lab:'—',
+ cus:'제한 초과 제품 유통 금지',
+ org:'ECHA / 국내 KTR·KCL 등', link:'echa.europa.eu'},
+{c:'EU',cat:'인증·등록',nm:'식품 표시규정(FIC) 적합',mand:1,why:'식품 선택',
+ when:s=>s.p==='food',
+ reg:'EU 1169/2011 (식품정보제공규정), 위생패키지 852/2004',
+ test:'잔류농약·오염물질(EU 기준) 검사',
+ doc:'수출 위생증명서, 성분 명세서',
+ lab:'알레르기 유발물질 굵은 글씨, 영양성분표, 현지어 표기',
+ cus:'국경검역소(BCP) 검사 대상 품목 사전 확인',
+ org:'식약처 지정 검사기관', link:'ec.europa.eu/food'},
+{c:'EU',cat:'인증·등록',nm:'CPNP 화장품 등록',mand:1,why:'화장품 선택',
+ when:s=>s.p==='cosm',
+ reg:'EU 화장품규정 1223/2009',
+ test:'안전성 평가(CPSR)',
+ doc:'제품정보파일(PIF), 역내 책임자(RP) 지정, CPNP 등록',
+ lab:'성분표기(INCI), RP 주소 표기',
+ cus:'CPNP 미등록 제품 유통 불가',
+ org:'EU RP 대행기관', link:'ec.europa.eu'},
+{c:'EU',cat:'인증·등록',nm:'CE 마킹 — 기계지침',mand:1,why:'기계·부품 + 산업용',
+ when:s=>s.p==='mach'&&s.use==='ind',
+ reg:'기계지침 2006/42/EC (2027년 기계규정으로 대체 예정)',
+ test:'위험성 평가, 안전 관련 시험',
+ doc:'기술문서, DoC, 사용설명서(현지어)',
+ lab:'CE 마크, 명판(제조자·모델·연도)',
+ cus:'사용설명서 미비 시 지적 사례 다수',
+ org:'EU NB / 국내 협약기관', link:'ec.europa.eu'},
+
+/* ---------- 중국 ---------- */
+{c:'CN',cat:'인증·등록',nm:'CCC 강제인증',mand:1,why:'전원 사용 선택',
+ when:s=>s.power,
+ reg:'중국 강제성 제품인증 관리규정 (CNCA 목록 품목)',
+ test:'GB 4943(정보기기 안전), GB/T 9254(EMC) 등',
+ doc:'신청서, 시험성적서, 공장심사',
+ lab:'CCC 마크 부착 의무',
+ cus:'CCC 대상 품목 미인증 시 통관 불가',
+ org:'CQC 등 중국 지정 인증기관 (국내 창구: KTL·KTR 협약)', link:'cnca.gov.cn'},
+{c:'CN',cat:'인증·등록',nm:'SRRC 무선형식승인',mand:1,why:'무선 기능 선택',
+ when:s=>s.wifi,
+ reg:'중국 전파관리조례',
+ test:'무선 주파수·출력 시험 (중국 현지 시험)',
+ doc:'형식승인 신청서, 시험성적서',
+ lab:'CMIIT ID 표기',
+ cus:'미승인 무선기기 통관 불가',
+ org:'SRTC 등 중국 국가무선검측센터', link:'srrc.org.cn'},
+{c:'CN',cat:'시험·검사',nm:'GB 31241 배터리 안전',mand:1,why:'배터리 내장 선택',
+ when:s=>s.batt,
+ reg:'휴대용 전자제품용 리튬배터리 안전 국가표준',
+ test:'과충전·단락·낙하 등 안전 시험',
+ doc:'시험성적서 (CCC 범위 포함 여부 확인)',
+ lab:'배터리 규격 표기',
+ cus:'2024년부터 배터리 CCC 대상 편입 — 주의',
+ org:'CQC / 협약시험소', link:'cnca.gov.cn'},
+{c:'CN',cat:'인증·등록',nm:'GB 6675 완구 강제검험',mand:1,why:'어린이용 선택',
+ when:s=>s.child,
+ reg:'완구 안전 국가표준 GB 6675, CCC(완구류)',
+ test:'기계물리·가연성·중금속 용출 시험',
+ doc:'CCC 인증서(해당 품목), 검험검역 신고',
+ lab:'중문 라벨, 연령 표시, 경고문구',
+ cus:'중문 라벨 사전 심사 권장',
+ org:'CQC / 중국 지정시험소', link:'samr.gov.cn'},
+{c:'CN',cat:'인증·등록',nm:'GACC 해외 생산기업 등록',mand:1,why:'식품 선택',
+ when:s=>s.p==='food',
+ reg:'수입식품 해외생산기업 등록관리규정 (해관총서 248·249호령)',
+ test:'GB 2760(첨가물), GB 7718(라벨) 적합성',
+ doc:'GACC 등록번호, 위생증명서, 성분 배합비',
+ lab:'중문 라벨 의무 (등록번호 기재)',
+ cus:'GACC 미등록 시 통관 불가 — 리드타임 3~6개월 고려',
+ org:'식약처(추천 등록 품목) / GACC 직접 등록', link:'customs.gov.cn'},
+{c:'CN',cat:'인증·등록',nm:'NMPA 화장품 등록·허가',mand:1,why:'화장품 선택',
+ when:s=>s.p==='cosm',
+ reg:'화장품감독관리조례(CSAR)',
+ test:'안전성 평가, 효능 평가 (기능성)',
+ doc:'경내책임자 지정, 처방·공정 자료, 등록/허가증',
+ lab:'중문 라벨, 등록번호 표기',
+ cus:'통관 시 등록증 대조',
+ org:'NMPA / 경내책임자 대행기관', link:'nmpa.gov.cn'},
+
+/* ---------- 일본 ---------- */
+{c:'JP',cat:'인증·등록',nm:'PSE 인증 (전기용품안전법)',mand:1,why:'전원 사용 선택',
+ when:s=>s.power,
+ reg:'전기용품안전법 — 특정전기용품(마름모PSE)/기타(원형PSE)',
+ test:'전기안전 시험 (J 규격)',
+ doc:'시험성적서, 수입사업자 신고',
+ lab:'PSE 마크 + 수입사업자명 표기',
+ cus:'PSE 미표시 제품 판매 불가',
+ org:'JET, JQA / 국내 협약: KTL 등', link:'meti.go.jp'},
+{c:'JP',cat:'인증·등록',nm:'TELEC 기술기준적합증명',mand:1,why:'무선 기능 선택',
+ when:s=>s.wifi,
+ reg:'전파법',
+ test:'무선설비 기술기준 시험',
+ doc:'기술기준적합증명서',
+ lab:'기적(技適) 마크 표기',
+ cus:'기적마크 없는 무선기기 사용·판매 불법',
+ org:'TELEC, DSP리서치 등 등록증명기관', link:'soumu.go.jp'},
+{c:'JP',cat:'시험·검사',nm:'PSE 리튬배터리 (별표9)',mand:1,why:'배터리 내장 선택',
+ when:s=>s.batt,
+ reg:'전기용품안전법 별표 제9 — 리튬이온축전지',
+ test:'과충전·외부단락 등 안전 시험',
+ doc:'시험성적서, 수입신고',
+ lab:'원형 PSE 마크',
+ cus:'에너지밀도 400Wh/L 이상 대상 여부 확인',
+ org:'JET / 국내 협약시험소', link:'meti.go.jp'},
+{c:'JP',cat:'인증·등록',nm:'식품 수입신고 (식품위생법)',mand:1,why:'식품 선택',
+ when:s=>s.p==='food',
+ reg:'식품위생법 제27조 — 후생노동성 검역소 신고',
+ test:'첨가물 포지티브리스트, 잔류농약 기준 적합',
+ doc:'수입신고서, 원재료·제조공정표, 시험성적서',
+ lab:'일본어 라벨 (원재료명·보존방법·수입자)',
+ cus:'초회 수입 시 명령검사 대상 품목 확인',
+ org:'후생노동성 검역소 / 등록검사기관', link:'mhlw.go.jp'},
+{c:'JP',cat:'인증·등록',nm:'ST 마크 (완구 임의인증)',mand:0,why:'어린이용 선택',
+ when:s=>s.child,
+ reg:'일본완구협회 ST 기준 (임의이나 유통망 요구 일반적)',
+ test:'기계물리·가연성·화학 시험',
+ doc:'ST 인증 계약, 시험성적서',
+ lab:'ST 마크 표기',
+ cus:'—',
+ org:'일본완구협회 지정시험소', link:'toys.or.jp'},
+{c:'JP',cat:'인증·등록',nm:'화장품 제조판매업 신고',mand:1,why:'화장품 선택',
+ when:s=>s.p==='cosm',
+ reg:'의약품의료기기법(약기법)',
+ test:'성분 배합한도(네거티브·포지티브리스트) 적합',
+ doc:'제조판매업자(현지) 통한 신고, 성분표',
+ lab:'일본어 전성분 표시',
+ cus:'제조판매업자 미지정 시 수입 불가',
+ org:'현지 제조판매업 파트너', link:'pmda.go.jp'},
+
+/* ---------- 베트남 ---------- */
+{c:'VN',cat:'인증·등록',nm:'CR 인증 (QCVN 적합)',mand:1,why:'전원 사용 선택',
+ when:s=>s.power,
+ reg:'베트남 기술규정 QCVN 4:2009 등 (대상 품목)',
+ test:'전기안전 시험',
+ doc:'적합성 인증서, 적합 공시',
+ lab:'CR 마크 부착',
+ cus:'대상 품목 통관 시 인증서 제출',
+ org:'QUATEST 1·3 등 지정기관', link:'tcvn.gov.vn'},
+{c:'VN',cat:'인증·등록',nm:'MIC 무선 형식승인',mand:1,why:'무선 기능 선택',
+ when:s=>s.wifi,
+ reg:'정보통신부(MIC) 규정, QCVN 54 등',
+ test:'무선 성능 시험 (현지 또는 MRA 성적서)',
+ doc:'형식승인서, 적합공시',
+ lab:'ICT 규정 라벨',
+ cus:'미승인 무선기기 통관 제한',
+ org:'MIC 산하 시험소 / 한-베 MRA 활용', link:'mic.gov.vn'},
+{c:'VN',cat:'인증·등록',nm:'식품 공시 등록',mand:1,why:'식품 선택',
+ when:s=>s.p==='food',
+ reg:'식품안전법, 의정서 15/2018/ND-CP',
+ test:'안전 기준 적합 시험 (미생물·중금속)',
+ doc:'자가공시 또는 등록공시, CFS(자유판매증명서)',
+ lab:'베트남어 라벨 (공시번호 기재)',
+ cus:'건강보조식품은 등록공시(사전승인) 필요',
+ org:'베트남 보건부(MOH) / 현지 대행', link:'moh.gov.vn'},
+{c:'VN',cat:'인증·등록',nm:'화장품 신고 (Notification)',mand:1,why:'화장품 선택',
+ when:s=>s.p==='cosm',
+ reg:'아세안 화장품지침(ACD) 준용',
+ test:'중금속·미생물 한도 적합',
+ doc:'제품신고서(PIF), CFS, 위임장',
+ lab:'베트남어 라벨, 신고번호',
+ cus:'신고 수리 후 수입 가능',
+ org:'베트남 의약품관리국(DAV)', link:'dav.gov.vn'},
+{c:'VN',cat:'시험·검사',nm:'어린이 완구 QCVN 3 적합',mand:1,why:'어린이용 선택',
+ when:s=>s.child,
+ reg:'완구 기술규정 QCVN 3:2019/BKHCN',
+ test:'기계물리·가연성·중금속 시험',
+ doc:'적합성 인증서, CR 마크',
+ lab:'CR 마크 + 베트남어 라벨',
+ cus:'통관 시 적합성 평가 등록 확인',
+ org:'QUATEST / 지정기관', link:'tcvn.gov.vn'},
+
+/* ---------- 공통 ---------- */
+{c:'*',cat:'통관·운송',nm:'리튬배터리 항공·해상 운송 요건',mand:1,why:'배터리 내장 선택',
+ when:s=>s.batt,
+ reg:'IATA DGR / IMDG Code',
+ test:'UN38.3 (필수 선행)',
+ doc:'위험물 신고서, 시험요약서',
+ lab:'리튬배터리 취급 라벨(UN3480/3481)',
+ cus:'포장 기준(PI 965~967) 미준수 시 선적 거부',
+ org:'포워더·위험물 검사기관', link:'iata.org'},
+{c:'*',cat:'통관·운송',nm:'한-상대국 FTA 원산지증명 활용',mand:0,why:'관세 절감 (공통 안내)',
+ when:s=>true,
+ reg:'해당국 FTA 협정 (관세 인하·철폐)',
+ test:'—',
+ doc:'원산지증명서(C/O), 원산지 소명자료',
+ lab:'원산지 표시 규정 준수',
+ cus:'C/O 미비 시 특혜세율 적용 불가',
+ org:'대한상공회의소, 세관', link:'fta.go.kr'},
+];
+
+const state={country:'US',p:'elec',use:'home',child:false,power:false,batt:false,wifi:false,ing:[]};
+
+/* 칩 이벤트 */
+document.querySelectorAll('#fUse .chip').forEach(ch=>ch.onclick=()=>{
+  document.querySelectorAll('#fUse .chip').forEach(x=>x.classList.remove('on'));
+  ch.classList.add('on'); state.use=ch.dataset.v; run();
+});
+document.querySelectorAll('#fChild .chip').forEach(ch=>ch.onclick=()=>{
+  document.querySelectorAll('#fChild .chip').forEach(x=>x.classList.remove('on'));
+  ch.classList.add('on'); state.child=ch.dataset.v==='Y'; run();
+});
+document.querySelectorAll('#fFunc .chip').forEach(ch=>ch.onclick=()=>{
+  ch.classList.toggle('on'); state[ch.dataset.v]=ch.classList.contains('on'); run();
+});
+fCountry.onchange=e=>{state.country=e.target.value;run();};
+fProduct.onchange=e=>{state.p=e.target.value;run();};
+
+/* 성분 태그 */
+ingInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.value.trim()){
+    e.preventDefault();
+    const v=e.target.value.trim();
+    if(!state.ing.includes(v)){state.ing.push(v);drawTags();run();}
+    e.target.value='';
+  }
+});
+ingInput.addEventListener('change',e=>{ // datalist 선택
+  const v=e.target.value.trim();
+  if(v&&!state.ing.includes(v)){state.ing.push(v);drawTags();run();e.target.value='';}
+});
+function drawTags(){
+  ingBox.querySelectorAll('.tag').forEach(t=>t.remove());
+  state.ing.forEach(v=>{
+    const t=document.createElement('span');t.className='tag';t.textContent=v;
+    t.onclick=()=>{state.ing=state.ing.filter(x=>x!==v);drawTags();run();};
+    ingBox.insertBefore(t,ingInput);
+  });
+}
+function resetAll(){location.reload();}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function run(){
+  const s={...state,child:state.child,p:state.p};
+  const hit=RULES.filter(r=>(r.c===state.country||r.c==='*')&&r.when(s));
+  const mand=hit.filter(r=>r.mand).length;
+  nAll.textContent=hit.length; nMand.textContent=mand;
+
+  const funcs=[state.power&&'전원',state.batt&&'배터리',state.wifi&&'무선'].filter(Boolean).join(', ')||'없음';
+  condTxt.innerHTML=`<b>선택 조건</b> — 국가: ${CN_NAMES[state.country]} · 제품군: ${P_NAMES[state.p]} · 용도: ${{home:'가정용',ind:'산업용',biz:'업무용'}[state.use]} · ${state.child?'어린이용':'일반용'} · 기능: ${funcs}${state.ing.length?' · 성분: '+state.ing.map(esc).join(', '):''}`;
+
+  if(!hit.length){
+    results.innerHTML=`<div class="empty">선택한 조건에 매칭되는 규제·인증 정보가 없습니다.<br>제품 기능(전원/배터리/무선) 또는 제품군을 선택해 보세요.</div>`;
+    return;
+  }
+  const cats=[...new Set(hit.map(r=>r.cat))];
+  let html='';
+  cats.forEach(cat=>{
+    html+=`<div class="cat-tit">📌 ${cat} (${hit.filter(r=>r.cat===cat).length})</div>`;
+    hit.filter(r=>r.cat===cat).forEach((r,i)=>{
+      html+=`<div class="card${cat===cats[0]&&i===0?' open':''}">
+        <div class="card-hd" onclick="this.parentNode.classList.toggle('open')">
+          <span class="badge ${r.mand?'m':'v'}">${r.mand?'강제':'권장'}</span>
+          <span class="nm">${esc(r.nm)}</span>
+          <span class="why">매칭 사유: ${esc(r.why)}</span>
+          <span class="arrow">▶</span>
+        </div>
+        <div class="card-bd"><div class="detail-grid">
+          <div class="k">적용 규제</div><div class="v">${esc(r.reg)}</div>
+          <div class="k">인증·시험항목</div><div class="v">${esc(r.test)}</div>
+          <div class="k">준비서류</div><div class="v">${esc(r.doc)}</div>
+          <div class="k">표시사항</div><div class="v">${esc(r.lab)}</div>
+          <div class="k">통관 유의사항</div><div class="v">${esc(r.cus)}</div>
+          <div class="k">수행기관</div><div class="v">${esc(r.org)}</div>
+          <div class="k">근거자료</div><div class="v"><a href="#">🔗 ${esc(r.link)} 원문 바로가기</a></div>
+        </div></div>
+      </div>`;
+    });
+  });
+  if(state.p==='food'){
+    html+=`<div class="food-link">🍜 <b>${CN_NAMES[state.country]} 식품 분야 심층보고서</b>가 준비되어 있습니다. 원료·첨가물 기준, 부적합 사례까지 확인하세요.
+      <button onclick="location.href='food-report.html'">심층보고서 보기</button></div>`;
+  }
+  results.innerHTML=html;
+}
+run();
+</script>
+</body>
+</html>
